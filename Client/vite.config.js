@@ -20,7 +20,7 @@ export default defineConfig({
         target: 'http://localhost:3000',
         ...defaultOptions,
       },
-      '/profile': {
+      '/user': {
         target: 'http://localhost:3000',
         ...defaultOptions,
       }

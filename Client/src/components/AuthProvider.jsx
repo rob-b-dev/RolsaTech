@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { ToastContainer } from 'react-toastify';
+import PropTypes from 'prop-types';
 
 // Helpers
 import { isLoggedIn } from "../helpers/jwt";
@@ -99,6 +100,11 @@ export const AuthProvider = ({ children }) => {
     )
 
 }
+
+AuthProvider.propTypes = {
+    children: PropTypes.node.isRequired,
+};
+
 
 
 export default AuthProvider

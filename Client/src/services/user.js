@@ -3,7 +3,7 @@ import axiosInstance from "./axios";
 const userService = {
     async gatherProfile() {
         try {
-            const response = await axiosInstance.get('/profile/gather')
+            const response = await axiosInstance.get('/user/gather')
             return response.data
         } catch (error) {
             console.error(error.message)
@@ -13,7 +13,7 @@ const userService = {
 
     async updateProfile(data) {
         try {
-            const response = await axiosInstance.post('/profile/update', data)
+            const response = await axiosInstance.post('/user/update', data)
             return response
         } catch (error) {
             console.error(error.message)
@@ -23,7 +23,7 @@ const userService = {
 
     async deleteProfile() {
         try {
-            const response = await axiosInstance.post('/profile/delete')
+            const response = await axiosInstance.post('/user/delete')
             return response
         } catch (error) {
             console.error(error.message)

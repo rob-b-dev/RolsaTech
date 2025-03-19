@@ -17,7 +17,7 @@ app.use(authorization);
 
 
 app.use("/auth", jwtAuth)
-app.use("/profile", profile)
+app.use("/user", profile)
 
 
 app.listen(3000, () => {

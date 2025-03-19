@@ -5,13 +5,10 @@ import { useAuth } from "../hooks/useAuth";
 
 function Profile() {
     const navigate = useNavigate();
-    const [userCredentials, setUserCredentials] = useState({});
-    const [editField, setEditField] = useState(null);
+    const [updatedField, setUpdatedField] = useState({}); // Stores only the edited field
+    const [originalCredentials, setOriginalCredentials] = useState({}); // Stores the original data
+    const [editField, setEditField] = useState(null); // Currently edited field
     const { isAuthenticated } = useAuth();
-
-    useEffect(() => {
-        console.log(userCredentials)
-    }, [userCredentials]);
 
     useEffect(() => {
         if (!isAuthenticated) navigate('/home');
@@ -21,18 +18,16 @@ function Profile() {
         const gatherProfile = async () => {
             try {
                 const profileData = await userService.gatherProfile();
-                if (!profileData) {
-                    return null;
+                if (profileData) {
+                    setOriginalCredentials({
+                        fname: profileData.fname,
+                        lname: profileData.lname,
+                        email: profileData.email,
+                        phoneNumber: profileData.phoneNumber,
+                        password: "********",
+                    });
+                    console.log("Profile data received", profileData);
                 }
-                setUserCredentials({
-                    fname: profileData.fname,
-                    lname: profileData.lname,
-                    email: profileData.email,
-                    phoneNumber: profileData.phoneNumber,
-                    password: "********"
-                });
-
-                console.log('profile data received', profileData)
             } catch (error) {
                 console.error("Error fetching profile data:", error);
             }
@@ -43,18 +38,30 @@ function Profile() {
     const handleEdit = (field, e) => {
         e.preventDefault();
         setEditField(field);
+        setUpdatedField({ [field]: originalCredentials[field] }); // Initialize input with current value
     };
 
     const handleCancel = (e) => {
         e.preventDefault();
         setEditField(null);
+        setUpdatedField({}); // Reset changes
     };
 
     const handleChange = (field, value) => {
-        setUserCredentials(prev => ({
-            ...prev,
-            [field]: value
-        }));
+        setUpdatedField({ [field]: value }); // Update only the field being edited
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!editField || !updatedField[editField]) return;
+        try {
+            await userService.updateProfile({ [editField]: updatedField[editField] });
+
+            setEditField(null); // Exit editing state
+            setUpdatedField({}); // Reset changes 
+        } catch (error) {
+            console.error("Error updating profile data:", error.message);
+        }
     };
 
     const renderField = (label, field, type) => (
@@ -64,23 +71,24 @@ function Profile() {
                 <>
                     <input
                         type={type}
-                        className="border border-black text-sm p-1 bg-white rounded-md w-full"
-                        value={userCredentials[field]}
+                        className="border border-black text-sm p-1 bg-white rounded-md w-[62%]"
+                        value={updatedField[field] || ""}
                         onChange={(e) => handleChange(field, e.target.value)}
                     />
                     <div className="flex space-x-4 mt-2">
-                        <button className="text-green-500 hover:underline" type="submit">Submit</button>
-                        <button className="text-red-500 hover:underline" onClick={handleCancel}>Cancel</button>
+                        <button className="text-green-500 hover:underline" type="submit" onClick={handleSubmit}>
+                            Submit
+                        </button>
+                        <button className="text-red-500 hover:underline" onClick={handleCancel}>
+                            Cancel
+                        </button>
                     </div>
                 </>
             ) : (
                 <div className="flex justify-between items-center">
-                    <p className="text-gray-700">{userCredentials[field]}</p>
-                    <button
-                        className="text-blue-500 hover:underline cursor-pointer"
-                        onClick={(e) => editField === field ? handleCancel(e) : handleEdit(field, e)}
-                    >
-                        {editField === field ? "Cancel" : "Edit"}
+                    <p className="text-gray-700">{originalCredentials[field]}</p>
+                    <button className="text-blue-500 hover:underline cursor-pointer" onClick={(e) => handleEdit(field, e)}>
+                        Edit
                     </button>
                 </div>
             )}
